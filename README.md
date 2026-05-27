@@ -1,4 +1,6 @@
-[README.md](https://github.com/user-attachments/files/28310673/README.md)
+![Repo size](https://img.shields.io/github/repo-size/eco-by-different/winzstd)
+![Last commit](https://img.shields.io/github/last-commit/eco-by-different/winzstd)
+
 # WinZSTD
 
 **WinZSTD 1.0** is a lightweight native Windows GUI for creating `.tar` and `.tar.zst` archives using the built-in Windows `tar.exe`.
