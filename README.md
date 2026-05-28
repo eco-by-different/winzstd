@@ -48,13 +48,11 @@ Creates a `.tar.zst` archive using the default Windows/libarchive Zstandard beha
 
 Creates a `.tar.zst` archive using:
 
-```powershell
---options zstd:compression-level=22
-```
+`--options zstd:compression-level=22`
 
 ## Screenshot
 
-![WinZSTD screenshot](assets/screenshot.png)
+![WinZSTD screenshot](assets/WinZSTD-screenshot.png)
 
 ## Download
 
