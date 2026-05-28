@@ -50,3 +50,12 @@ Creates a `.tar.zst` archive using:
 
 ```powershell
 --options zstd:compression-level=22
+```
+
+## Download
+
+Latest release:
+https://github.com/eco-by-different/winzstd/releases/latest
+
+Direct download:
+https://github.com/eco-by-different/winzstd/releases/download/v1.0.0/WinZSTD_1.0.0.zip
