@@ -52,6 +52,10 @@ Creates a `.tar.zst` archive using:
 --options zstd:compression-level=22
 ```
 
+## Screenshot
+
+![WinZSTD screenshot](assets/screenshot.png)
+
 ## Download
 
 Latest release:  
