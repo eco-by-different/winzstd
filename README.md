@@ -42,10 +42,13 @@ WinZSTD follows the eco-by-different philosophy: use native Windows components, 
 
 WinZSTD 1.1.0 replaces the old fixed `STORE / NORMAL / EXTREME` buttons with a simple compression timeline.
 
+The compression timeline is intentionally adjustable because the highest ZSTD level is not always the best practical choice for every file type. Higher levels can improve compression ratio, but they can also be slower and may require more system resources. In many real-world cases, a level such as `19` can be a better practical choice than `22`.
+
 - `0` = STORE / `.tar`
 - `1` = fastest ZSTD compression
 - `11` = default balanced level
-- `22` = extreme ZSTD compression
+- `19` = strong practical compression
+- `22` = maximum ZSTD level
 
 ### Level 0
 
@@ -69,9 +72,11 @@ The default compression level is `11`.
 
 This is intended as a practical middle-ground between compression speed and output size.
 
-### Extreme levels
+### High compression levels
 
 Higher levels such as `18-22` may produce smaller archives, but compression can be slower and may require more system resources.
+
+Level `22` is the maximum ZSTD level, but it is not always the best practical choice. Depending on the input data, level `19` can often provide a better balance between compression ratio, time and resource usage.
 
 ## TAR before ZSTD
 
@@ -103,7 +108,9 @@ Use level `0` when you only need a plain `.tar` archive.
 
 Use level `11` for balanced `.tar.zst` compression.
 
-Use higher levels such as `18-22` when smaller output size is more important than compression speed.
+Use levels around `18-19` when you want strong compression with a practical balance between output size and compression time.
+
+Use level `22` only when maximum compression level is desired and compression speed is not important.
 
 ## Screenshot
 
@@ -154,4 +161,3 @@ No external archiver or compressor is required.
 ## License
 
 MIT License
-``
