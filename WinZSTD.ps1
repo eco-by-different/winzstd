@@ -1,7 +1,8 @@
 # =================================================================
-# WinZSTD 1.0 - powered by Windows TAR.exe
-# Windows native TAR/TAR.ZST GUI - eco-by-different with AI GPT
-# STORE=.tar | NORMAL=.tar.zst | EXTREME=.tar.zst level 22
+# WinZSTD 1.1 compact-clean - powered by Windows TAR.exe
+# Native TAR/ZSTD GUI using Windows tar.exe
+# STORE=.tar | ZSTD=.tar.zst levels 1-22
+# Compression timeline: 0 STORE ... 22 EXTREME
 # =================================================================
 
 Add-Type -AssemblyName System.Windows.Forms
@@ -35,18 +36,13 @@ function P($X, $Y) { [System.Drawing.Point]::new($X, $Y) }
 function S($W, $H) { [System.Drawing.Size]::new($W, $H) }
 
 function N {
-    param(
-        [string]$Type,
-        [hashtable]$Props
-    )
+    param([string]$Type, [hashtable]$Props)
 
     $obj = New-Object $Type
-
     foreach ($key in $Props.Keys) {
         $obj.$key = $Props[$key]
     }
-
-    return $obj
+    $obj
 }
 
 # --- CONSTANTS ---
@@ -83,25 +79,7 @@ if (-not (Test-Path -LiteralPath $tarPath)) {
 }
 
 $script:selectedPath = ""
-
-# --- MODES ---
-$modes = @{
-    Store = @{
-        Text = "STORE / TAR"
-        Ext  = ".tar"
-        Args = @()
-    }
-    Normal = @{
-        Text = "NORMAL / TAR.ZST"
-        Ext  = ".tar.zst"
-        Args = @("-a")
-    }
-    Extreme = @{
-        Text = "EXTREME / TAR.ZST level 22"
-        Ext  = ".tar.zst"
-        Args = @("-a", "--options", "zstd:compression-level=22")
-    }
-}
+$script:selectedType = ""
 
 # --- UI HELPERS ---
 function New-EcoLabel {
@@ -116,11 +94,8 @@ function New-EcoLabel {
     )
 
     N "System.Windows.Forms.Label" @{
-        Text      = $Text
-        Location  = P $X $Y
-        Size      = S $W $H
-        Font      = $Font
-        ForeColor = $ForeColor
+        Text = $Text; Location = P $X $Y; Size = S $W $H
+        Font = $Font; ForeColor = $ForeColor; BackColor = $cBg
     }
 }
 
@@ -137,12 +112,8 @@ function New-EcoButton {
     )
 
     $button = N "System.Windows.Forms.Button" @{
-        Text                    = $Text
-        Location                = P $X $Y
-        Size                    = S $W $H
-        Font                    = $Font
-        BackColor               = $BackColor
-        ForeColor               = $ForeColor
+        Text = $Text; Location = P $X $Y; Size = S $W $H
+        Font = $Font; BackColor = $BackColor; ForeColor = $ForeColor
         UseVisualStyleBackColor = $false
     }
 
@@ -153,13 +124,29 @@ function New-EcoButton {
     }
     catch {}
 
-    return $button
+    $button
+}
+
+function New-EcoCheck {
+    param(
+        [string]$Text,
+        [int]$X,
+        [int]$Y,
+        [int]$W,
+        [bool]$Checked = $true
+    )
+
+    N "System.Windows.Forms.CheckBox" @{
+        Text = $Text; Location = P $X $Y; Size = S $W 22
+        Font = $fNormal; BackColor = $cBg; ForeColor = $cTxt
+        Checked = $Checked
+    }
 }
 
 function Msg {
     param(
         [string]$Message,
-        [string]$Title = "ZSTD 1.0",
+        [string]$Title = "WinZSTD 1.1",
         [System.Windows.Forms.MessageBoxIcon]$Icon = [System.Windows.Forms.MessageBoxIcon]::Information,
         [System.Windows.Forms.MessageBoxButtons]$Buttons = [System.Windows.Forms.MessageBoxButtons]::OK
     )
@@ -178,63 +165,102 @@ function Set-AppStatus {
     $form.Refresh()
 }
 
+# --- COMPRESSION PROFILE ---
+function Get-CompressionProfile {
+    param([int]$Level, [bool]$TarBeforeZstd)
+
+    $Level = [Math]::Max(0, [Math]::Min(22, $Level))
+
+    if ($Level -eq 0) {
+        return @{
+            Text = "STORE / TAR"
+            Ext  = ".tar"
+            Args = @()
+        }
+    }
+
+    $ext  = if ($TarBeforeZstd) { ".tar.zst" } else { ".zst" }
+    $text = if ($TarBeforeZstd) { "TAR.ZST level $Level" } else { "ZST level $Level" }
+
+    @{
+        Text = $text
+        Ext  = $ext
+        Args = @("-a", "--options", "zstd:compression-level=$Level")
+    }
+}
+
 # --- MAIN FORM ---
 $form = N "System.Windows.Forms.Form" @{
-    Text            = "WinZSTD 1.0 - powered by Windows TAR.exe"
-    Size            = S 520 405
-    StartPosition   = "CenterScreen"
-    BackColor       = $cBg
+    Text = "WinZSTD 1.1 - powered by Windows TAR.exe"
+    ClientSize = S 505 470
+    StartPosition = "CenterScreen"
+    BackColor = $cBg
     FormBorderStyle = "FixedSingle"
-    MaximizeBox     = $false
-    TopMost         = $false
+    MaximizeBox = $false
+    TopMost = $false
 }
 
-# --- GUI ELEMENTS ---
+# --- MAIN GUI ---
 $lblInput    = New-EcoLabel "1. Select what to archive:" 20 20 -Font $fBold
-$btnFile     = New-EcoButton "Add FILE" 20 45 230 30
-$btnFolder   = New-EcoButton "Add FOLDER" 255 45 230 30
-$lblSelected = New-EcoLabel "Selected: none" 20 82 465 20 $fItalic ([System.Drawing.Color]::DimGray)
+$btnFile     = New-EcoButton "Add FILE" 20 48 230 30
+$btnFolder   = New-EcoButton "Add FOLDER" 255 48 230 30
+$lblSelected = New-EcoLabel "Selected: none" 20 88 465 20 $fItalic ([System.Drawing.Color]::DimGray)
 
-$lblTarget = New-EcoLabel "2. Destination archive path:" 20 112 -Font $fBold
+$lblTarget = New-EcoLabel "2. Destination archive path:" 20 125 -Font $fBold
 
 $txtTarget = N "System.Windows.Forms.TextBox" @{
-    Location  = P 20 137
-    Size      = S 395 23
-    Font      = $fNormal
-    ReadOnly  = $true
+    Location = P 20 153
+    Size = S 395 23
+    Font = $fNormal
+    ReadOnly = $true
     BackColor = $cBg
 }
 
-$btnTarget = New-EcoButton "..." 422 136 63 24
+$btnTarget = New-EcoButton "..." 422 152 63 24
 
-$lblComp = New-EcoLabel "3. Choose native TAR/ZSTD profile:" 20 188 -Font $fBold
-
-$btnStore = New-EcoButton `
-    "STORE" 20 213 150 42 $fBold `
-    ([System.Drawing.Color]::Firebrick) `
-    ([System.Drawing.Color]::White)
-
-$btnNormal = New-EcoButton `
-    "NORMAL" 180 213 150 42 $fBold `
-    ([System.Drawing.Color]::DarkOrange) `
-    ([System.Drawing.Color]::White)
-
-$btnExtreme = New-EcoButton `
-    "EXTREME" 340 213 145 42 $fBold `
-    ([System.Drawing.Color]::DarkViolet) `
-    ([System.Drawing.Color]::White)
-
-$chkOpenFolder = N "System.Windows.Forms.CheckBox" @{
-    Text      = "Open output folder after success"
-    Location  = P 20 280
-    Size      = S 300 22
-    Font      = $fNormal
-    BackColor = $cBg
+$grpCompression = N "System.Windows.Forms.GroupBox" @{
+    Text = "3. Compression settings"
+    Location = P 20 195
+    Size = S 465 120
+    Font = $fBold
     ForeColor = $cTxt
-    Checked   = $true
+    BackColor = $cBg
 }
 
-$lblStatus = New-EcoLabel "Ready." 20 325 465 20 $fItalic ([System.Drawing.Color]::DimGray)
+$trkCompression = N "System.Windows.Forms.TrackBar" @{
+    Location = P 15 22
+    Size = S 435 45
+    Minimum = 0
+    Maximum = 22
+    Value = 11
+    TickFrequency = 1
+    SmallChange = 1
+    LargeChange = 3
+    BackColor = $cBg
+}
+
+$lblCompHint = New-EcoLabel `
+    "0 = STORE / .tar    |    1-22 = .tar.zst compression" `
+    18 68 425 20 $fItalic ([System.Drawing.Color]::DimGray)
+
+$lblCompValue = New-EcoLabel `
+    "Selected: TAR.ZST level 11" `
+    18 94 425 20 $fBold ([System.Drawing.Color]::DarkOrange)
+
+$grpCompression.Controls.AddRange([System.Windows.Forms.Control[]]@(
+    $trkCompression,
+    $lblCompHint,
+    $lblCompValue
+))
+
+$btnCreate = New-EcoButton `
+    "CREATE ARCHIVE" 20 330 465 38 $fBold `
+    ([System.Drawing.Color]::SeaGreen) `
+    ([System.Drawing.Color]::White)
+
+$chkTarBeforeZstd = New-EcoCheck "Create .tar before ZSTD" 20 383 210 $true
+$chkOpenFolder    = New-EcoCheck "Open output folder after success" 255 383 230 $true
+$lblStatus        = New-EcoLabel "Ready." 20 417 465 20 $fItalic ([System.Drawing.Color]::DimGray)
 
 $form.Controls.AddRange([System.Windows.Forms.Control[]]@(
     $lblInput,
@@ -244,10 +270,9 @@ $form.Controls.AddRange([System.Windows.Forms.Control[]]@(
     $lblTarget,
     $txtTarget,
     $btnTarget,
-    $lblComp,
-    $btnStore,
-    $btnNormal,
-    $btnExtreme,
+    $grpCompression,
+    $btnCreate,
+    $chkTarBeforeZstd,
     $chkOpenFolder,
     $lblStatus
 ))
@@ -262,57 +287,70 @@ function Remove-KnownArchiveExtension {
         return ""
     }
 
-    if ($fileName -match '(?i)\.(tar\.zst|tzst|tar)$') {
-        return ($fileName -replace '(?i)\.(tar\.zst|tzst|tar)$', '')
+    if ($fileName -match '(?i)\.(tar\.zst|tzst|zst|tar)$') {
+        return ($fileName -replace '(?i)\.(tar\.zst|tzst|zst|tar)$', '')
     }
 
-    return [System.IO.Path]::GetFileNameWithoutExtension($fileName)
-}
-
-function Get-DefaultTargetPath {
-    param(
-        [string]$SourcePath,
-        [string]$Extension
-    )
-
-    if ([string]::IsNullOrWhiteSpace($SourcePath)) {
-        return ""
-    }
-
-    return "$SourcePath$Extension"
+    [System.IO.Path]::GetFileNameWithoutExtension($fileName)
 }
 
 function Set-TargetExtension {
-    param(
-        [ValidateSet("Store", "Normal", "Extreme")]
-        [string]$Mode
-    )
+    param([string]$Extension)
 
     if ([string]::IsNullOrWhiteSpace($script:selectedPath)) {
         return
     }
 
-    $extension = $modes[$Mode].Ext
-
     if ([string]::IsNullOrWhiteSpace($txtTarget.Text)) {
-        $txtTarget.Text = Get-DefaultTargetPath $script:selectedPath $extension
+        $txtTarget.Text = "$script:selectedPath$Extension"
         return
     }
 
-    $current = $txtTarget.Text.Trim('"')
-    $dir = [System.IO.Path]::GetDirectoryName($current)
+    $current  = $txtTarget.Text.Trim('"')
+    $dir      = [System.IO.Path]::GetDirectoryName($current)
+    $baseName = Remove-KnownArchiveExtension $current
 
     if ([string]::IsNullOrWhiteSpace($dir)) {
         $dir = $scriptDir
     }
 
-    $baseName = Remove-KnownArchiveExtension $current
-
     if ([string]::IsNullOrWhiteSpace($baseName)) {
-        $baseName = "ZSTD_{0}" -f (Get-Date -Format "yyyyMMdd_HHmmss")
+        $baseName = "WinZSTD_{0}" -f (Get-Date -Format "yyyyMMdd_HHmmss")
     }
 
-    $txtTarget.Text = Join-Path $dir ($baseName + $extension)
+    $txtTarget.Text = Join-Path $dir ($baseName + $Extension)
+}
+
+# --- UI STATE ---
+function Update-CompressionUi {
+    $level = [int]$trkCompression.Value
+    $forceTar = ($script:selectedType -eq "Folder" -or $level -eq 0)
+
+    if ($forceTar) {
+        $chkTarBeforeZstd.Checked = $true
+    }
+
+    $chkTarBeforeZstd.Enabled = -not $forceTar
+
+    $profile = Get-CompressionProfile $level ([bool]$chkTarBeforeZstd.Checked)
+
+    $lblCompValue.Text = "Selected: $($profile.Text)"
+    $lblCompValue.ForeColor = if ($level -eq 0) {
+        [System.Drawing.Color]::Firebrick
+    }
+    elseif ($level -ge 18) {
+        [System.Drawing.Color]::DarkViolet
+    }
+    elseif ($level -ge 8) {
+        [System.Drawing.Color]::DarkOrange
+    }
+    else {
+        [System.Drawing.Color]::SeaGreen
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($script:selectedPath)) {
+        Set-TargetExtension $profile.Ext
+    }
 }
 
 function Set-SelectedPath {
@@ -323,23 +361,16 @@ function Set-SelectedPath {
     )
 
     $script:selectedPath = $Path
+    $script:selectedType = $Type
     $lblSelected.Text = "Selected: $script:selectedPath"
 
-    $btnFile.BackColor = if ($Type -eq "File") {
-        [System.Drawing.Color]::LightBlue
-    }
-    else {
-        $cBg
-    }
+    $btnFile.BackColor   = if ($Type -eq "File") { [System.Drawing.Color]::LightBlue } else { $cBg }
+    $btnFolder.BackColor = if ($Type -eq "Folder") { [System.Drawing.Color]::LightBlue } else { $cBg }
 
-    $btnFolder.BackColor = if ($Type -eq "Folder") {
-        [System.Drawing.Color]::LightBlue
-    }
-    else {
-        $cBg
-    }
+    Update-CompressionUi
 
-    $txtTarget.Text = Get-DefaultTargetPath $script:selectedPath ".tar.zst"
+    $profile = Get-CompressionProfile ([int]$trkCompression.Value) ([bool]$chkTarBeforeZstd.Checked)
+    $txtTarget.Text = "$script:selectedPath$($profile.Ext)"
 }
 
 # --- WORKER SCRIPT ---
@@ -357,10 +388,10 @@ $ErrorActionPreference = "Stop"
 try {
     $config = Get-Content -LiteralPath $ConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json
 
-    $tarPath  = [string]$config.TarPath
-    $source   = [string]$config.SourcePath
-    $dest     = [string]$config.DestinationPath
-    $extra    = @($config.TarArgsExtra) | Where-Object { $_ }
+    $tarPath = [string]$config.TarPath
+    $source  = [string]$config.SourcePath
+    $dest    = [string]$config.DestinationPath
+    $extra   = @($config.TarArgsExtra) | Where-Object { $_ }
 
     if (-not (Test-Path -LiteralPath $tarPath)) {
         throw "tar.exe was not found."
@@ -429,7 +460,7 @@ $btnFolder.Add_Click({
 $btnTarget.Add_Click({
     $dialog = New-Object System.Windows.Forms.SaveFileDialog
     $dialog.Title = "Select destination archive"
-    $dialog.Filter = "TAR+ZSTD Archive (*.tar.zst)|*.tar.zst|TAR Archive (*.tar)|*.tar|All files (*.*)|*.*"
+    $dialog.Filter = "TAR+ZSTD Archive (*.tar.zst)|*.tar.zst|TAR Archive (*.tar)|*.tar|ZSTD Archive (*.zst)|*.zst|All files (*.*)|*.*"
     $dialog.DefaultExt = "tar.zst"
     $dialog.AddExtension = $true
     $dialog.OverwritePrompt = $true
@@ -437,7 +468,6 @@ $btnTarget.Add_Click({
     try {
         if (-not [string]::IsNullOrWhiteSpace($txtTarget.Text)) {
             $dialog.FileName = [System.IO.Path]::GetFileName($txtTarget.Text)
-
             $initialDir = [System.IO.Path]::GetDirectoryName($txtTarget.Text)
 
             if (-not [string]::IsNullOrWhiteSpace($initialDir) -and (Test-Path -LiteralPath $initialDir)) {
@@ -454,13 +484,16 @@ $btnTarget.Add_Click({
     }
 })
 
+$trkCompression.Add_ValueChanged({
+    Update-CompressionUi
+})
+
+$chkTarBeforeZstd.Add_CheckedChanged({
+    Update-CompressionUi
+})
+
 # --- EXECUTION ENGINE ---
 function Execute-Archive {
-    param(
-        [ValidateSet("Store", "Normal", "Extreme")]
-        [string]$Mode
-    )
-
     if (-not (Test-Path -LiteralPath $tarPath)) {
         Msg "tar.exe was not found." "Missing TAR Engine" ([System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
         return
@@ -476,9 +509,13 @@ function Execute-Archive {
         return
     }
 
-    Set-TargetExtension $Mode
+    Update-CompressionUi
 
-    $modeData   = $modes[$Mode]
+    $level = [int]$trkCompression.Value
+    $modeData = Get-CompressionProfile $level ([bool]$chkTarBeforeZstd.Checked)
+
+    Set-TargetExtension $modeData.Ext
+
     $targetPath = $txtTarget.Text.Trim('"')
     $targetDir  = [System.IO.Path]::GetDirectoryName($targetPath)
 
@@ -508,18 +545,19 @@ function Execute-Archive {
     Set-AppStatus "In progress..." ([System.Drawing.Color]::DarkOrange)
 
     $guid = [guid]::NewGuid().ToString("N")
-    $workerScript = Join-Path $env:TEMP "zstd_worker_$guid.ps1"
-    $configPath   = Join-Path $env:TEMP "zstd_config_$guid.json"
+    $workerScript = Join-Path $env:TEMP "winzstd_worker_$guid.ps1"
+    $configPath   = Join-Path $env:TEMP "winzstd_config_$guid.json"
 
     New-WorkerScript $workerScript
 
     [PSCustomObject]@{
-        TarPath         = $tarPath
-        SourcePath      = $script:selectedPath
-        DestinationPath = $targetPath
-        Mode            = $Mode
-        ModeText        = $modeData.Text
-        TarArgsExtra    = @($modeData.Args)
+        TarPath          = $tarPath
+        SourcePath       = $script:selectedPath
+        DestinationPath  = $targetPath
+        CompressionLevel = $level
+        TarBeforeZstd    = [bool]$chkTarBeforeZstd.Checked
+        ModeText         = $modeData.Text
+        TarArgsExtra     = @($modeData.Args)
     } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $configPath -Encoding UTF8
 
     $success = $false
@@ -528,17 +566,16 @@ function Execute-Archive {
 
     try {
         $procInfo = N "System.Diagnostics.ProcessStartInfo" @{
-            FileName         = $psExe
-            Arguments        = '-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "{0}" -ConfigPath "{1}"' -f $workerScript, $configPath
+            FileName = $psExe
+            Arguments = '-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "{0}" -ConfigPath "{1}"' -f $workerScript, $configPath
             WorkingDirectory = $scriptDir
-            UseShellExecute  = $false
-            CreateNoWindow   = $true
-            WindowStyle      = [System.Diagnostics.ProcessWindowStyle]::Hidden
+            UseShellExecute = $false
+            CreateNoWindow = $true
+            WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Hidden
         }
 
         $proc = [System.Diagnostics.Process]::Start($procInfo)
         $proc.WaitForExit()
-
         $success = ($proc.ExitCode -eq 0)
     }
     catch {
@@ -577,18 +614,13 @@ function Execute-Archive {
     Msg $message "Archive Error" ([System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
 }
 
-# --- BUTTON ACTIONS ---
-$btnStore.Add_Click({
-    Execute-Archive "Store"
+# --- BUTTON ACTION ---
+$btnCreate.Add_Click({
+    Execute-Archive
 })
 
-$btnNormal.Add_Click({
-    Execute-Archive "Normal"
-})
-
-$btnExtreme.Add_Click({
-    Execute-Archive "Extreme"
-})
+# --- INITIAL UI STATE ---
+Update-CompressionUi
 
 # --- CLEANUP ---
 $form.Add_FormClosing({
