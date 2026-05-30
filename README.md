@@ -32,6 +32,7 @@ WinZSTD follows the eco-by-different philosophy: use native Windows components, 
 - Levels `1-22` create `.tar.zst` archives
 - Optional `.tar` container before ZSTD compression
 - `.tar` container is automatically enforced for folders
+- `.tar` container is automatically enforced for level `0`
 - Hidden background execution
 - Simple status messages
 - Optional output folder opening after successful archive creation
@@ -41,9 +42,8 @@ WinZSTD follows the eco-by-different philosophy: use native Windows components, 
 
 WinZSTD 1.1.0 replaces the old fixed `STORE / NORMAL / EXTREME` buttons with a simple compression timeline.
 
-### Level 0
-
-Creates a plain `.tar` archive without Zstandard compression.
-
 ```text
-output.tar
+0  = STORE / .tar
+1  = fastest ZSTD compression
+11 = default balanced level
+22 = extreme ZSTD compression
