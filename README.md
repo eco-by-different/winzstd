@@ -5,10 +5,11 @@
 
 WinZSTD 1.1.0 is a lightweight native Windows GUI for creating `.tar` and `.tar.zst` archives using the built-in Windows `tar.exe`.
 
-No external binaries.
-No bundled tools.
-No 7-Zip dependency.
+No external binaries.  
+No bundled tools.  
+No 7-Zip dependency.  
 Just Windows PowerShell, WinForms and Windows TAR.
+
 ## Philosophy
 
 **eco-by-different**
@@ -25,38 +26,24 @@ WinZSTD follows the eco-by-different philosophy: use native Windows components, 
 - Uses built-in Windows `tar.exe`
 - Creates `.tar` archives
 - Creates `.tar.zst` archives
-- STORE profile: `.tar`
-- NORMAL profile: `.tar.zst`
-- EXTREME profile: `.tar.zst` with Zstandard level 22
+- Compression level timeline from `0` to `22`
+- Default compression level: `11`
+- Level `0` creates a plain `.tar` archive
+- Levels `1-22` create `.tar.zst` archives
+- Optional `.tar` container before ZSTD compression
+- `.tar` container is automatically enforced for folders
 - Hidden background execution
 - Simple status messages
 - Optional output folder opening after successful archive creation
 - No external compression binaries required
 
-## Compression Profiles
+## Compression Timeline
 
-### STORE
+WinZSTD 1.1.0 replaces the old fixed `STORE / NORMAL / EXTREME` buttons with a simple compression timeline.
+
+### Level 0
 
 Creates a plain `.tar` archive without Zstandard compression.
 
-### NORMAL
-
-Creates a `.tar.zst` archive using the default Windows/libarchive Zstandard behavior.
-
-### EXTREME
-
-Creates a `.tar.zst` archive using:
-
-`--options zstd:compression-level=22`
-
-## Screenshot
-
-![WinZSTD screenshot](assets/WinZSTD-screenshot.png)
-
-## Download
-
-Latest release:  
-https://github.com/eco-by-different/winzstd/releases/latest
-
-Direct download:  
-https://github.com/eco-by-different/winzstd/releases/download/v1.0.0/WinZSTD_1.0.0.zip
+```text
+output.tar
