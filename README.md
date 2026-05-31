@@ -46,9 +46,7 @@ Select input → choose compression level → create archive
 
 ## Screenshot
 
-```text
-![WinZSTD screenshot](assets/winzstd-screenshot.png)
-```
+![WinZSTD screenshot](assets/WinZSTD-screenshot.png)
 
 ---
 
@@ -56,21 +54,15 @@ Select input → choose compression level → create archive
 
 Latest release:
 
-```text
 https://github.com/eco-by-different/winzstd/releases/latest
-```
 
 Direct EXE download:
 
-```text
 https://github.com/eco-by-different/winzstd/releases/latest/download/WinZSTD.exe
-```
 
 Source code:
 
-```text
 WinZSTD.ps1
-```
 
 ---
 
@@ -116,71 +108,6 @@ Recommended reference points:
 
 The highest level is not always the best practical choice.  
 For many files, level `19` can be a better balance between compression ratio, speed and resource usage than level `22`.
-
----
-
-## File and Folder Behavior
-
-### Folders
-
-Folders are always archived through TAR first:
-
-```text
-folder.tar
-folder.tar.zst
-```
-
-This is required because ZSTD is a stream compressor, while TAR provides the archive container.
-
-### Files
-
-Single files can be compressed either as:
-
-```text
-file.tar.zst
-```
-
-or directly as:
-
-```text
-file.zst
-```
-
-depending on the `Create .tar before ZSTD` option.
-
----
-
-## How It Works
-
-WinZSTD runs Windows `tar.exe` in the background.
-
-For ZSTD compression levels, it uses:
-
-```powershell
---options zstd:compression-level=LEVEL
-```
-
-Example:
-
-```powershell
-tar.exe -a --options zstd:compression-level=19 -cf output.tar.zst -C parent-folder input-folder
-```
-
-Temporary worker/config files are created in the user temp directory during archive creation and removed after the operation finishes.
-
----
-
-Recommended GitHub tag:
-
-```text
-v1.2.0
-```
-
-Recommended EXE version:
-
-```text
-1.2.0.0
-```
 
 ---
 
