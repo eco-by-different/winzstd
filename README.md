@@ -113,6 +113,10 @@ For many files, level `19` can be a better balance between compression ratio, sp
 
 ## Version History
 
+### WinZSTD 1.2.1
+
+- Added Royal Black Noir interface
+
 ### WinZSTD 1.2.0
 
 - Added bottom progress bar during archive creation
