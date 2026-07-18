@@ -1,9 +1,9 @@
 # =================================================================
-# WinZSTD 1.2 compact-clean - powered by Windows TAR.exe
+# WinZSTD 1.2.1 Royal Black Noir - powered by Windows TAR.exe
 # Native TAR/ZSTD GUI using Windows tar.exe
 # STORE=.tar | ZSTD=.tar.zst levels 1-22
 # Compression timeline: 0 STORE ... 22 EXTREME
-# Progress bar at bottom
+# Royal Black Noir single-theme interface
 # =================================================================
 
 Add-Type -AssemblyName System.Windows.Forms
@@ -24,8 +24,11 @@ public static class EcoConsoleWindow {
 }
 "@
 }
+
 $consolePtr = [EcoConsoleWindow]::GetConsoleWindow()
-if ($consolePtr -ne [IntPtr]::Zero) { [EcoConsoleWindow]::ShowWindow($consolePtr, 0) | Out-Null }
+if ($consolePtr -ne [IntPtr]::Zero) {
+    [EcoConsoleWindow]::ShowWindow($consolePtr, 0) | Out-Null
+}
 
 [System.Windows.Forms.Application]::EnableVisualStyles()
 
@@ -39,10 +42,33 @@ function N {
     $obj
 }
 
-# --- CONSTANTS ---
-$cBg     = [System.Drawing.Color]::White
-$cTxt    = [System.Drawing.ColorTranslator]::FromHtml("#2F4F4F")
-$cGray   = [System.Drawing.Color]::LightGray
+# --- ROYAL BLACK NOIR THEME ---
+$cBg          = [System.Drawing.ColorTranslator]::FromHtml("#191B20")
+$cSurface     = [System.Drawing.ColorTranslator]::FromHtml("#242832")
+$cSurfaceAlt  = [System.Drawing.ColorTranslator]::FromHtml("#2D3340")
+$cInput       = [System.Drawing.ColorTranslator]::FromHtml("#15171C")
+
+$cTxt         = [System.Drawing.ColorTranslator]::FromHtml("#E3E6EB")
+$cTxtMuted    = [System.Drawing.ColorTranslator]::FromHtml("#A9B1BF")
+$cTxtDisabled = [System.Drawing.ColorTranslator]::FromHtml("#707986")
+$cButtonText  = [System.Drawing.ColorTranslator]::FromHtml("#F2F4F7")
+
+$cBorder      = [System.Drawing.ColorTranslator]::FromHtml("#505968")
+$cBorderSoft  = [System.Drawing.ColorTranslator]::FromHtml("#3A414D")
+
+$cRoyal       = [System.Drawing.ColorTranslator]::FromHtml("#4B6698")
+$cRoyalHover  = [System.Drawing.ColorTranslator]::FromHtml("#607DB0")
+$cRoyalActive = [System.Drawing.ColorTranslator]::FromHtml("#38527E")
+
+$cSuccess     = [System.Drawing.ColorTranslator]::FromHtml("#477B5E")
+$cSuccessHover= [System.Drawing.ColorTranslator]::FromHtml("#56896B")
+$cSuccessDown = [System.Drawing.ColorTranslator]::FromHtml("#37664B")
+$cSuccessText = [System.Drawing.ColorTranslator]::FromHtml("#EEF7F1")
+$cWarning     = [System.Drawing.ColorTranslator]::FromHtml("#D0A354")
+$cDanger      = [System.Drawing.ColorTranslator]::FromHtml("#C65E62")
+$cExtreme     = [System.Drawing.ColorTranslator]::FromHtml("#9B70C8")
+$cStatusOk    = [System.Drawing.ColorTranslator]::FromHtml("#72B88A")
+
 $fNormal = [System.Drawing.Font]::new("Segoe UI", 9)
 $fBold   = [System.Drawing.Font]::new("Segoe UI", 9, [System.Drawing.FontStyle]::Bold)
 $fItalic = [System.Drawing.Font]::new("Segoe UI", 9, [System.Drawing.FontStyle]::Italic)
@@ -72,9 +98,14 @@ function New-EcoLabel {
         [System.Drawing.Font]$Font = $fNormal,
         [System.Drawing.Color]$ForeColor = $cTxt
     )
+
     N "System.Windows.Forms.Label" @{
-        Text = $Text; Location = P $X $Y; Size = S $W $H
-        Font = $Font; ForeColor = $ForeColor; BackColor = $cBg
+        Text = $Text
+        Location = P $X $Y
+        Size = S $W $H
+        Font = $Font
+        ForeColor = $ForeColor
+        BackColor = [System.Drawing.Color]::Transparent
     }
 }
 
@@ -82,43 +113,64 @@ function New-EcoButton {
     param(
         [string]$Text, [int]$X, [int]$Y, [int]$W, [int]$H,
         [System.Drawing.Font]$Font = $fNormal,
-        [System.Drawing.Color]$BackColor = $cBg,
-        [System.Drawing.Color]$ForeColor = [System.Drawing.Color]::Black
+        [System.Drawing.Color]$BackColor = $cSurface,
+        [System.Drawing.Color]$ForeColor = $cTxt
     )
+
     $button = N "System.Windows.Forms.Button" @{
-        Text = $Text; Location = P $X $Y; Size = S $W $H
-        Font = $Font; BackColor = $BackColor; ForeColor = $ForeColor
+        Text = $Text
+        Location = P $X $Y
+        Size = S $W $H
+        Font = $Font
+        BackColor = $BackColor
+        ForeColor = $ForeColor
         UseVisualStyleBackColor = $false
+        FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+        Cursor = [System.Windows.Forms.Cursors]::Hand
     }
+
     try {
-        $button.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
         $button.FlatAppearance.BorderSize = 1
-        $button.FlatAppearance.BorderColor = $cGray
+        $button.FlatAppearance.BorderColor = $cBorder
+        $button.FlatAppearance.MouseOverBackColor = $cRoyalHover
+        $button.FlatAppearance.MouseDownBackColor = $cRoyalActive
     } catch {}
+
     $button
 }
 
 function New-EcoCheck {
     param([string]$Text, [int]$X, [int]$Y, [int]$W, [bool]$Checked = $true)
+
     N "System.Windows.Forms.CheckBox" @{
-        Text = $Text; Location = P $X $Y; Size = S $W 22
-        Font = $fNormal; BackColor = $cBg; ForeColor = $cTxt
+        Text = $Text
+        Location = P $X $Y
+        Size = S $W 22
+        Font = $fNormal
+        BackColor = $cBg
+        ForeColor = $cTxt
         Checked = $Checked
+        FlatStyle = [System.Windows.Forms.FlatStyle]::Standard
+        UseVisualStyleBackColor = $false
+        CheckAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+        TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+        Cursor = [System.Windows.Forms.Cursors]::Hand
     }
 }
 
 function Msg {
     param(
         [string]$Message,
-        [string]$Title = "WinZSTD 1.2",
+        [string]$Title = "WinZSTD 1.2.1 Royal Black Noir",
         [System.Windows.Forms.MessageBoxIcon]$Icon = [System.Windows.Forms.MessageBoxIcon]::Information,
         [System.Windows.Forms.MessageBoxButtons]$Buttons = [System.Windows.Forms.MessageBoxButtons]::OK
     )
+
     [System.Windows.Forms.MessageBox]::Show($Message, $Title, $Buttons, $Icon)
 }
 
 function Set-AppStatus {
-    param([string]$Text, [System.Drawing.Color]$Color = [System.Drawing.Color]::DimGray)
+    param([string]$Text, [System.Drawing.Color]$Color = $cTxtMuted)
     $lblStatus.Text = $Text
     $lblStatus.ForeColor = $Color
     $form.Refresh()
@@ -139,10 +191,11 @@ function Get-CompressionProfile {
 
 # --- MAIN FORM ---
 $form = N "System.Windows.Forms.Form" @{
-    Text = "WinZSTD 1.2 - powered by Windows TAR.exe"
+    Text = "WinZSTD 1.2.1 - Royal Black Noir - powered by Windows TAR.exe"
     ClientSize = S 505 470
     StartPosition = "CenterScreen"
     BackColor = $cBg
+    ForeColor = $cTxt
     FormBorderStyle = "FixedSingle"
     MaximizeBox = $false
     TopMost = $false
@@ -152,42 +205,74 @@ $form = N "System.Windows.Forms.Form" @{
 $lblInput    = New-EcoLabel "1. Select what to archive:" 20 20 -Font $fBold
 $btnFile     = New-EcoButton "Add FILE" 20 48 230 30
 $btnFolder   = New-EcoButton "Add FOLDER" 255 48 230 30
-$lblSelected = New-EcoLabel "Selected: none" 20 88 465 20 $fItalic ([System.Drawing.Color]::DimGray)
+$lblSelected = New-EcoLabel "Selected: none" 20 88 465 20 $fItalic $cTxtMuted
 $lblTarget   = New-EcoLabel "2. Destination archive path:" 20 125 -Font $fBold
 
 $txtTarget = N "System.Windows.Forms.TextBox" @{
-    Location = P 20 153; Size = S 395 23
-    Font = $fNormal; ReadOnly = $true; BackColor = $cBg
+    Location = P 20 153
+    Size = S 395 23
+    Font = $fNormal
+    ReadOnly = $true
+    BackColor = $cInput
+    ForeColor = $cTxt
+    BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
+    TabStop = $false
+    HideSelection = $true
 }
+
 $btnTarget = New-EcoButton "..." 422 152 63 24
 
 $grpCompression = N "System.Windows.Forms.GroupBox" @{
     Text = "3. Compression settings"
-    Location = P 20 195; Size = S 465 120
-    Font = $fBold; ForeColor = $cTxt; BackColor = $cBg
+    Location = P 20 195
+    Size = S 465 120
+    Font = $fBold
+    ForeColor = $cTxt
+    BackColor = $cSurface
 }
 
 $trkCompression = N "System.Windows.Forms.TrackBar" @{
-    Location = P 15 22; Size = S 435 45
-    Minimum = 0; Maximum = 22; Value = 11
-    TickFrequency = 1; SmallChange = 1; LargeChange = 3
-    BackColor = $cBg
+    Location = P 15 22
+    Size = S 435 45
+    Minimum = 0
+    Maximum = 22
+    Value = 11
+    TickFrequency = 1
+    SmallChange = 1
+    LargeChange = 3
+    BackColor = $cSurface
+    ForeColor = $cTxt
 }
 
-$lblCompHint  = New-EcoLabel "0 = STORE / .tar    |    1-22 = .tar.zst compression" 18 68 425 20 $fItalic ([System.Drawing.Color]::DimGray)
-$lblCompValue = New-EcoLabel "Selected: TAR.ZST level 11" 18 94 425 20 $fBold ([System.Drawing.Color]::DarkOrange)
+$lblCompHint = New-EcoLabel `
+    "0 = STORE / .tar    |    1-22 = .tar.zst compression" `
+    18 68 425 20 $fItalic $cTxtMuted
+
+$lblCompValue = New-EcoLabel `
+    "Selected: TAR.ZST level 11" `
+    18 94 425 20 $fBold $cWarning
 
 $grpCompression.Controls.AddRange([System.Windows.Forms.Control[]]@(
     $trkCompression, $lblCompHint, $lblCompValue
 ))
 
-$btnCreate = New-EcoButton "CREATE ARCHIVE" 20 330 465 38 $fBold ([System.Drawing.Color]::SeaGreen) ([System.Drawing.Color]::White)
+$btnCreate = New-EcoButton `
+    "CREATE ARCHIVE" `
+    20 330 465 38 `
+    $fBold $cSuccess $cSuccessText
+
+try {
+    $btnCreate.FlatAppearance.MouseOverBackColor = $cSuccessHover
+    $btnCreate.FlatAppearance.MouseDownBackColor = $cSuccessDown
+} catch {}
+
 $chkTarBeforeZstd = New-EcoCheck "Create .tar before ZSTD" 20 383 210 $true
 $chkOpenFolder    = New-EcoCheck "Open output folder after success" 255 383 230 $true
-$lblStatus        = New-EcoLabel "Ready." 20 417 465 20 $fItalic ([System.Drawing.Color]::DimGray)
+$lblStatus        = New-EcoLabel "Ready." 20 417 465 20 $fItalic $cTxtMuted
 
 $progressBar = N "System.Windows.Forms.ProgressBar" @{
-    Location = P 20 445; Size = S 465 8
+    Location = P 20 445
+    Size = S 465 8
     Style = [System.Windows.Forms.ProgressBarStyle]::Marquee
     MarqueeAnimationSpeed = 25
     Visible = $false
@@ -244,18 +329,19 @@ function Update-CompressionUi {
 
     if ($forceTar) { $chkTarBeforeZstd.Checked = $true }
     $chkTarBeforeZstd.Enabled = -not $forceTar
+    $chkTarBeforeZstd.ForeColor = if ($chkTarBeforeZstd.Enabled) { $cTxt } else { $cTxtDisabled }
 
     $profile = Get-CompressionProfile $level ([bool]$chkTarBeforeZstd.Checked)
     $lblCompValue.Text = "Selected: $($profile.Text)"
 
     $lblCompValue.ForeColor = if ($level -eq 0) {
-        [System.Drawing.Color]::Firebrick
+        $cDanger
     } elseif ($level -ge 18) {
-        [System.Drawing.Color]::DarkViolet
+        $cExtreme
     } elseif ($level -ge 8) {
-        [System.Drawing.Color]::DarkOrange
+        $cWarning
     } else {
-        [System.Drawing.Color]::SeaGreen
+        $cStatusOk
     }
 
     if (-not [string]::IsNullOrWhiteSpace($script:selectedPath)) {
@@ -270,8 +356,11 @@ function Set-SelectedPath {
     $script:selectedType = $Type
     $lblSelected.Text = "Selected: $script:selectedPath"
 
-    $btnFile.BackColor   = if ($Type -eq "File") { [System.Drawing.Color]::LightBlue } else { $cBg }
-    $btnFolder.BackColor = if ($Type -eq "Folder") { [System.Drawing.Color]::LightBlue } else { $cBg }
+    $btnFile.BackColor = if ($Type -eq "File") { $cRoyal } else { $cSurface }
+    $btnFolder.BackColor = if ($Type -eq "Folder") { $cRoyal } else { $cSurface }
+
+    $btnFile.ForeColor = $cButtonText
+    $btnFolder.ForeColor = $cButtonText
 
     Update-CompressionUi
 
@@ -415,7 +504,7 @@ function Execute-Archive {
         if ($confirm -ne [System.Windows.Forms.DialogResult]::Yes) { return }
     }
 
-    Set-AppStatus "In progress..." ([System.Drawing.Color]::DarkOrange)
+    Set-AppStatus "In progress..." $cWarning
     $progressBar.Visible = $true
     $progressBar.MarqueeAnimationSpeed = 25
     $form.Refresh()
@@ -477,12 +566,12 @@ function Execute-Archive {
     }
 
     if ($success) {
-        Set-AppStatus "Operation successful." ([System.Drawing.Color]::Green)
+        Set-AppStatus "Operation successful." $cStatusOk
         if ($chkOpenFolder.Checked) { explorer.exe "/select,`"$targetPath`"" }
         return
     }
 
-    Set-AppStatus "Operation failed or aborted." ([System.Drawing.Color]::Red)
+    Set-AppStatus "Operation failed or aborted." $cDanger
 
     $message = "Operation failed or aborted."
     if ($errorMessage) { $message += "`n`n$errorMessage" }
