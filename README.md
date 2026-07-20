@@ -116,6 +116,7 @@ For many files, level `19` can be a better balance between compression ratio, sp
 ### WinZSTD 1.2.1
 
 - Added Royal Black Noir interface
+- Rebuilt with a lightweight launcher to reduce file size and eliminate the console window
 
 ### WinZSTD 1.2.0
 
