@@ -113,6 +113,21 @@ For many files, level `19` can be a better balance between compression ratio, sp
 
 ## Version History
 
+### WinZSTD 1.2.2
+
+WinZSTD 1.2.2 focuses on reliability, responsive operation, and a cleaner compression engine while preserving the existing Royal Black Noir interface.
+
+- Responsive GUI with asynchronous archive processing
+- Automatic multithreaded ZSTD compression
+- Safe replacement of existing archives
+- Drive-root archive support
+- Improved source and destination validation
+- Actual tar.exe error messages displayed in the GUI
+- Temporary worker data stored in %TEMP% and removed automatically
+- Centralized compression profile handling
+- Automatic TAR mode for folders and compression level 0
+- Improved archive extension and Save dialog handling
+
 ### WinZSTD 1.2.1
 
 - Added Royal Black Noir interface
