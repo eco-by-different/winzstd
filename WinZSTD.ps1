@@ -33,7 +33,17 @@ $scriptDir = if ($PSScriptRoot) { $PSScriptRoot }
 elseif ($MyInvocation.MyCommand.Path) { Split-Path -Parent $MyInvocation.MyCommand.Path }
 else { (Get-Location).Path }
 if (Test-Blank $scriptDir) { $scriptDir = (Get-Location).Path }
-$selfPath = if ($PSCommandPath) { $PSCommandPath } else { $MyInvocation.MyCommand.Path }
+$hostPath = [Environment]::GetCommandLineArgs()[0]
+$isCompiledExe = ([IO.Path]::GetExtension($hostPath) -ieq '.exe') -and
+                 ([IO.Path]::GetFileName($hostPath) -notmatch '^(powershell|pwsh)(\.exe)?$')
+$selfPath = if ($isCompiledExe) {
+    [IO.Path]::GetFullPath($hostPath)
+} elseif ($PSCommandPath) {
+    $PSCommandPath
+} else {
+    $MyInvocation.MyCommand.Path
+}
+if ($isCompiledExe) { $scriptDir = Split-Path -Parent $selfPath }
 
 $psExe = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
 $tarPath = Join-Path $env:SystemRoot 'System32\tar.exe'
@@ -357,10 +367,21 @@ function Start-ArchiveWorker {
     $threads=[Math]::Max(1,[Math]::Min(8,[Environment]::ProcessorCount))
     [pscustomobject]@{TarPath=$tarPath;SourcePath=$script:selectedPath;DestinationPath=$TargetPath;CompressionLevel=$Level;Threads=$threads;ResultPath=$result}|ConvertTo-Json -Depth 5|Set-Content -LiteralPath $config -Encoding UTF8
     if(Test-Blank $selfPath){throw 'The application must be started from a saved .ps1 file.'}
-    $workerArgs='-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "{0}" -WorkerConfigFile "{1}"'-f$selfPath,$config
-    $psi=N 'System.Diagnostics.ProcessStartInfo' @{FileName=$psExe;Arguments=$workerArgs;WorkingDirectory=$scriptDir;UseShellExecute=$false;CreateNoWindow=$true;WindowStyle=[System.Diagnostics.ProcessWindowStyle]::Hidden}
-    $proc=[System.Diagnostics.Process]::Start($psi)
-    if($null-eq$proc){throw 'Unable to start the archive worker.'}
+        if (Test-Blank $selfPath) { throw 'Unable to determine the application path.' }
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    $psi.UseShellExecute = $false
+    $psi.CreateNoWindow = $true
+    $psi.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Hidden
+    $psi.WorkingDirectory = $scriptDir
+    if ($isCompiledExe) {
+        $psi.FileName = $selfPath
+        $psi.Arguments = '-WorkerConfigFile "{0}"' -f $config
+    } else {
+        $psi.FileName = $psExe
+        $psi.Arguments = '-NoProfile -NonInteractive -ExecutionPolicy Bypass -WindowStyle Hidden -File "{0}" -WorkerConfigFile "{1}"' -f $selfPath,$config
+    }
+    $proc = [System.Diagnostics.Process]::Start($psi)
+    if ($null -eq $proc) { throw 'Unable to start the archive worker.' }
     $script:currentProcess=$proc;$script:currentWorkRoot=$root;$script:currentResult=$result;$script:pendingTarget=$TargetPath
     Set-UiBusy $true;Set-AppStatus 'Starting archive worker...' $cWarning;$timer.Start()
 }
