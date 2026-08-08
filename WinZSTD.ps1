@@ -280,7 +280,7 @@ $grpCompression.Controls.AddRange([System.Windows.Forms.Control[]]@($trkCompress
 $btnCreate=New-EcoButton 'CREATE ARCHIVE' 20 330 465 38 $fBold $cSuccess $cSuccessText
 try{$btnCreate.FlatAppearance.MouseOverBackColor=$cSuccessHover;$btnCreate.FlatAppearance.MouseDownBackColor=$cSuccessDown}catch{}
 $chkTarBeforeZstd=New-EcoCheck 'Create .tar before ZSTD' 20 383 210 $true
-$chkOpenFolder=New-EcoCheck 'Open output folder after success' 255 383 230 $true
+$chkOpenFolder=New-EcoCheck 'Open output folder after success' 296 383 230 $true
 $lblStatus=New-EcoLabel 'Ready.' 20 417 465 20 $fItalic $cTxtMuted
 $progressBar=N 'System.Windows.Forms.ProgressBar' @{Location=P 20 445;Size=S 465 8;Style=[System.Windows.Forms.ProgressBarStyle]::Marquee;MarqueeAnimationSpeed=0;Visible=$false}
 $form.Controls.AddRange([System.Windows.Forms.Control[]]@($lblInput,$btnFile,$btnFolder,$lblSelected,$lblTarget,$txtTarget,$btnTarget,$grpCompression,$btnCreate,$chkTarBeforeZstd,$chkOpenFolder,$lblStatus,$progressBar))
