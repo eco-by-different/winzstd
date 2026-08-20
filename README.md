@@ -25,7 +25,6 @@ Select input → choose compression level → create archive
 ```
 
 ---
-
 # Antivirus Notice (False Positives)
 The `.exe` binary is generated, which some sensitive antivirus engines, including Windows Defender or machine-learning based scanners, may flag as a false positive.
 
