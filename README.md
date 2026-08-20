@@ -28,8 +28,7 @@ Select input → choose compression level → create archive
 # Antivirus Notice (False Positives)
 The `.exe` binary is generated, which some sensitive antivirus engines, including Windows Defender or machine-learning based scanners, may flag as a false positive.
 
-The underlying PowerShell script is clean.
-If your system blocks the `.exe`, you can safely run the raw `WinZSTD.ps1` script instead.
+The underlying PowerShell script is clean.If your system blocks the `.exe`, you can safely run the raw `WinZSTD.ps1` script instead.
 
 ---
 
