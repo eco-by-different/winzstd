@@ -49,13 +49,11 @@ The underlying PowerShell script is clean.If your system blocks the `.exe`, you 
 - No external compression binaries required
 
 ---
-
 ## Screenshot
 
 ![WinZSTD screenshot](assets/WinZSTD-screenshot.png)
 
 ---
-
 ## Download
 
 Latest release:
@@ -71,7 +69,6 @@ Source code:
 WinZSTD.ps1
 
 ---
-
 ## Requirements
 
 - Windows 10 or Windows 11
@@ -82,7 +79,6 @@ WinZSTD.ps1
 No installation of Zstandard, 7-Zip, PeaZip or other archiving tools is required.
 
 ---
-
 ## Usage
 
 1. Run `WinZSTD.exe` or `WinZSTD.ps1`
@@ -93,7 +89,6 @@ No installation of Zstandard, 7-Zip, PeaZip or other archiving tools is required
 6. Wait until the operation finishes
 
 ---
-
 ## Compression Levels
 
 WinZSTD uses a simple compression timeline:
@@ -116,7 +111,6 @@ The highest level is not always the best practical choice.
 For many files, level `19` can be a better balance between compression ratio, speed and resource usage than level `22`.
 
 ---
-
 ## Version History
 
 ### WinZSTD 1.2.2
@@ -164,7 +158,6 @@ WinZSTD 1.2.2 focuses on reliability, responsive operation, and a cleaner compre
 - Added native Windows TAR/ZSTD GUI powered by Windows `tar.exe`
 
 ---
-
 ## Philosophy
 
 **eco-by-different**
@@ -176,7 +169,6 @@ Keep it practical.
 WinZSTD follows this idea by using native Windows components and avoiding unnecessary bundled tools.
 
 ---
-
 ## License
 
 MIT License
