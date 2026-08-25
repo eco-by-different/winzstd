@@ -3,7 +3,7 @@
 
 # WinZSTD
 
-**WinZSTD 1.2.1** is a lightweight native Windows GUI for creating `.tar`, `.tar.zst` and `.zst` archives using the built-in Windows `tar.exe`.
+**WinZSTD 1.2.2** is a lightweight native Windows GUI for creating `.tar`, `.tar.zst` and `.zst` archives using the built-in Windows `tar.exe`.
 
 No external binaries.  
 No bundled tools.  
