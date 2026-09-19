@@ -217,16 +217,11 @@ if ($consolePtr -ne [IntPtr]::Zero) { [EcoConsoleWindow]::ShowWindow($consolePtr
 [System.Windows.Forms.Application]::EnableVisualStyles()
 
 # --- ROYAL BLACK NOIR THEME ---
-$cBg=[System.Drawing.ColorTranslator]::FromHtml('#191B20'); $cSurface=[System.Drawing.ColorTranslator]::FromHtml('#242832')
-$cInput=[System.Drawing.ColorTranslator]::FromHtml('#15171C'); $cTxt=[System.Drawing.ColorTranslator]::FromHtml('#E3E6EB')
-$cTxtMuted=[System.Drawing.ColorTranslator]::FromHtml('#A9B1BF'); $cTxtDisabled=[System.Drawing.ColorTranslator]::FromHtml('#707986')
-$cButtonText=[System.Drawing.ColorTranslator]::FromHtml('#F2F4F7'); $cBorder=[System.Drawing.ColorTranslator]::FromHtml('#505968')
-$cRoyal=[System.Drawing.ColorTranslator]::FromHtml('#4B6698'); $cRoyalHover=[System.Drawing.ColorTranslator]::FromHtml('#607DB0')
-$cRoyalActive=[System.Drawing.ColorTranslator]::FromHtml('#38527E'); $cSuccess=[System.Drawing.ColorTranslator]::FromHtml('#477B5E')
-$cSuccessHover=[System.Drawing.ColorTranslator]::FromHtml('#56896B'); $cSuccessDown=[System.Drawing.ColorTranslator]::FromHtml('#37664B')
-$cSuccessText=[System.Drawing.ColorTranslator]::FromHtml('#EEF7F1'); $cWarning=[System.Drawing.ColorTranslator]::FromHtml('#D0A354')
-$cDanger=[System.Drawing.ColorTranslator]::FromHtml('#C65E62'); $cExtreme=[System.Drawing.ColorTranslator]::FromHtml('#9B70C8')
-$cStatusOk=[System.Drawing.ColorTranslator]::FromHtml('#72B88A')
+$cBg,$cSurface,$cInput,$cTxt,$cTxtMuted,$cTxtDisabled,$cButtonText,$cBorder,
+$cRoyal,$cRoyalHover,$cRoyalActive,$cSuccess,$cSuccessHover,$cSuccessDown,
+$cSuccessText,$cWarning,$cDanger,$cExtreme,$cStatusOk =
+    '191B20|242832|15171C|E3E6EB|A9B1BF|707986|F2F4F7|505968|4B6698|607DB0|38527E|477B5E|56896B|37664B|EEF7F1|D0A354|C65E62|9B70C8|72B88A'.Split('|') |
+    ForEach-Object { [System.Drawing.ColorTranslator]::FromHtml("#$_") }
 $fNormal=[System.Drawing.Font]::new('Segoe UI',9); $fBold=[System.Drawing.Font]::new('Segoe UI',9,[System.Drawing.FontStyle]::Bold)
 $fItalic=[System.Drawing.Font]::new('Segoe UI',9,[System.Drawing.FontStyle]::Italic)
 
