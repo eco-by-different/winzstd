@@ -113,6 +113,13 @@ For many files, level `19` can be a better balance between compression ratio, sp
 ---
 ## Version History
 
+### WinZSTD 1.2.3
+
+- Fixed **Create .tar before ZSTD** behavior.
+- Added true direct `.zst` compression for single files.
+- Preserved `.tar.zst` compression for folders and optional TAR wrapping for files.
+- Optimized the code without changing existing application behavior.
+
 ### WinZSTD 1.2.2
 
 WinZSTD 1.2.2 focuses on reliability, responsive operation, and a cleaner compression engine while preserving the existing Royal Black Noir interface.
